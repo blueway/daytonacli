@@ -94,10 +94,14 @@ if [ ! -f "$cache/libssl.a" ] || [ ! -f "$cache/libcrypto.a" ]; then
     # Debian/Ubuntu certificate layout, which is what the client verifies with.
     CC="musl-gcc -idirafter /usr/include -idirafter $multiarch" \
       ./Configure "$openssl_target" no-shared no-tests no-comp no-async \
-      --prefix="$cache/install" --openssldir=/etc/ssl >"$cache/configure.log" 2>&1 ||
+      --prefix="$cache/install" --openssldir=/etc/ssl >"$cache/configure.log" 2>&1 || {
+      tail -n 80 "$cache/configure.log"
       die "OpenSSL configure failed; see $cache/configure.log"
-    make -j"$(nproc)" >"$cache/build.log" 2>&1 ||
+    }
+    if ! make -j"$(nproc)" >"$cache/build.log" 2>&1; then
+      tail -n 120 "$cache/build.log"
       die "OpenSSL build failed; see $cache/build.log"
+    fi
     cp libssl.a libcrypto.a "$cache/"
   )
   say "daytona: OpenSSL is in $cache"
