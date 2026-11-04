@@ -64,6 +64,12 @@ case "$(uname -m)" in
   aarch64 | arm64) openssl_target=linux-aarch64 ;;
   *) openssl_target=linux-x86_64 ;;
 esac
+# GCC's outline atomics pull libgcc's lse-init.o, which calls __getauxval;
+# musl has no such symbol, so aarch64 static links fail without this.
+arch_flags=""
+if [ "$openssl_target" = linux-aarch64 ]; then
+  arch_flags="-mno-outline-atomics"
+fi
 
 mkdir -p "$work"
 
@@ -92,7 +98,7 @@ if [ ! -f "$cache/libssl.a" ] || [ ! -f "$cache/libcrypto.a" ]; then
     # no-shared: static archives only. no-async: no async stack. no-comp: zlib
     # is not needed. no-tests keeps the build short. openssldir matches the
     # Debian/Ubuntu certificate layout, which is what the client verifies with.
-    CC="musl-gcc -idirafter /usr/include -idirafter $multiarch" \
+    CC="musl-gcc $arch_flags -idirafter /usr/include -idirafter $multiarch" \
       ./Configure "$openssl_target" no-shared no-tests no-comp no-async \
       --prefix="$cache/install" --openssldir=/etc/ssl >"$cache/configure.log" 2>&1 || {
       tail -n 80 "$cache/configure.log"
@@ -153,7 +159,7 @@ while IFS= read -r name; do
   fi
 done <"$needed"
 
-musl-gcc -O2 -idirafter /usr/include -idirafter "$multiarch" -I"$work" \
+musl-gcc $arch_flags -O2 -idirafter /usr/include -idirafter "$multiarch" -I"$work" \
   -c "$root/scripts/static-openssl.c" -o "$work/static-openssl.o"
 
 # --- compiler driver -------------------------------------------------------
@@ -162,7 +168,7 @@ cat >"$work/daytona-musl-gcc" <<EOF
 # -idirafter keeps musl's libc headers ahead of glibc's while still making the
 # kernel UAPI headers reachable; -include limits.h supplies NAME_MAX, which
 # glibc's <unistd.h> provides transitively and musl's does not.
-common="-idirafter /usr/include -idirafter $multiarch -include limits.h"
+common="$arch_flags -idirafter /usr/include -idirafter $multiarch -include limits.h"
 for arg in "\$@"; do
   if [ "\$arg" = "-c" ]; then
     # shellcheck disable=SC2086
