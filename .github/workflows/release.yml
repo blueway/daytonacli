@@ -31,6 +31,11 @@ jobs:
           # run on any distribution regardless of its glibc version. A glibc
           # build would bake in the runner's symbol versions and refuse to
           # start on older systems ("GLIBC_2.38 not found").
+          #
+          # A static binary has no dynamic loader, so OpenSSL (which the HTTPS
+          # client loads with dlopen) is built against musl and linked in by
+          # scripts/build-linux-static.sh; the build fails rather than ship a
+          # binary that cannot talk to the API.
           - runner: ubuntu-latest
             target: linux-x86_64
             musl: true
@@ -53,11 +58,22 @@ jobs:
       - name: Show toolchain
         run: moon version --all
 
+      # musl-tools provides musl-gcc; perl, make and curl are what the OpenSSL
+      # build in scripts/build-linux-static.sh needs.
       - name: Install musl toolchain
         if: matrix.musl
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools
+          sudo apt-get install -y musl-tools perl make curl
+
+      # OpenSSL is the slow part of a static Linux build, and it rarely
+      # changes: reuse it across releases until the build script does.
+      - name: Cache the OpenSSL build
+        if: matrix.musl
+        uses: actions/cache@v4
+        with:
+          path: .cache/openssl-musl
+          key: openssl-musl-${{ matrix.target }}-${{ hashFiles('scripts/build-linux-static.sh') }}
 
       # A fresh runner has an empty registry index, so dependencies
       # (moonbitlang/x, moonbitlang/async, ...) cannot be resolved until the

@@ -5,7 +5,10 @@ It manages sandboxes, snapshots, volumes, organizations and the MCP server, and
 reads the same `config.json` as the Go CLI, so both clients can share a login.
 
 The binary is compiled ahead of time with MoonBit's native backend. Linux
-releases are linked statically against musl and run on any distribution.
+releases are linked statically against musl, so they run on any distribution
+regardless of its glibc version. OpenSSL is linked in as well: a static binary
+has no dynamic loader, so the HTTPS client's usual `dlopen("libssl.so.3")` is
+redirected to the built-in copy (see `scripts/static-openssl.c`).
 
 ## Build
 
@@ -20,9 +23,13 @@ moon build --target native --release
 For a fully static Linux binary:
 
 ```sh
-sudo apt-get install -y musl-tools
+sudo apt-get install -y musl-tools perl make curl
 ./scripts/build-linux-static.sh dist/daytona-linux-x86_64
 ```
+
+The first run downloads and builds OpenSSL for musl (~9 MB of archives) and
+keeps it in `.cache/openssl-musl`, so later builds are as fast as a normal
+`moon build`. Delete that directory to pick up a new OpenSSL.
 
 ## Authenticate
 
@@ -142,7 +149,7 @@ The script is written under `$HOME` and sourced from the shell profile.
 | `sandbox_cmds.mbt`, `snapshot_cmds.mbt`, `volume_cmds.mbt`, `organization_cmds.mbt` | command groups |
 | `mcp_cmds.mbt` | MCP stdio server and agent configuration |
 | `output.mbt` | tables, info blocks and JSON/YAML output |
-| `scripts/build-linux-static.sh` | static release build |
+| `scripts/build-linux-static.sh`, `static-openssl.c` | static release build and its dlopen shim |
 
 ## Known differences from the Go client
 

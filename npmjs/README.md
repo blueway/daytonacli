@@ -23,7 +23,8 @@ and caches it. Nothing is downloaded at install time.
 | macOS Apple silicon | `daytona-darwin-aarch64` |
 
 The Linux builds are linked statically against musl, so they run on any
-distribution regardless of its glibc version.
+distribution regardless of its glibc version. OpenSSL is linked into the
+binary too, so HTTPS keeps working without a system OpenSSL.
 
 ## Why there is no `postinstall`
 
