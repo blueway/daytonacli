@@ -1,0 +1,390 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "kupas/daytona"
+
+import {
+  "moonbitlang/async/http",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn active_organization(Config) -> Result[String, String]
+
+pub fn active_profile(Config) -> Result[Profile, String]
+
+pub fn add_profile(Config, Profile) -> Unit
+
+pub async fn api_delete(String) -> Result[@json.Json, String]
+
+pub async fn api_delete_allow_404(String) -> Result[Bool, String]
+
+pub fn api_error_message(@json.Json, String) -> String
+
+pub async fn api_get(String) -> Result[@json.Json, String]
+
+pub async fn api_get_with_headers(String, Map[String, String]) -> Result[@json.Json, String]
+
+pub fn api_headers(Profile, Map[String, String]) -> Map[@http.CaseInsensitiveString, String]
+
+pub async fn api_patch(String, @json.Json) -> Result[@json.Json, String]
+
+pub async fn api_post(String, @json.Json) -> Result[@json.Json, String]
+
+pub async fn api_post_empty(String) -> Result[@json.Json, String]
+
+pub async fn api_request(@http.RequestMethod, String, @json.Json?, extra_headers? : Map[String, String]) -> Result[ApiResponse, String]
+
+pub let api_version_header : String
+
+pub fn arg_bool(ParsedArgs, String) -> Bool
+
+pub fn arg_changed(ParsedArgs, String) -> Bool
+
+pub fn arg_int(ParsedArgs, String, Int32) -> Int32
+
+pub fn arg_list(ParsedArgs, String) -> Array[String]
+
+pub fn arg_value(ParsedArgs, String) -> String
+
+pub async fn await_sandbox_state(String, Array[String], Int32) -> Result[@json.Json, String]
+
+pub async fn await_snapshot_active(String, Int32) -> Result[@json.Json, String]
+
+pub fn bflag(String, String) -> FlagSpec
+
+pub fn check_exclusive(ParsedArgs, Array[String]) -> Result[Unit, String]
+
+pub fn cli_version() -> String
+
+pub async fn cmd_login(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_logout(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_organization_create(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_organization_delete(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_organization_list(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_organization_members(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_organization_use(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_action(String, String, Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_create(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_delete(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_exec(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_info(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_list(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_preview_url(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_sandbox_ssh(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_snapshot_activate(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_snapshot_create(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_snapshot_delete(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_snapshot_list(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_snapshot_push(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_volume_create(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_volume_delete(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_volume_get(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_volume_list(Array[String]) -> Result[Unit, String]
+
+pub async fn cmd_volume_resolve(Array[String]) -> Result[Unit, String]
+
+pub fn completion_script(String) -> String
+
+pub fn config_dir() -> String
+
+pub fn config_from_json(@json.Json) -> Config
+
+pub fn config_path() -> String
+
+pub fn config_to_json(Config) -> @json.Json
+
+pub fn created_id(@json.Json) -> String
+
+pub fn created_label(@json.Json, Int64) -> String
+
+pub let default_api_url : String
+
+pub fn empty_config() -> Config
+
+pub async fn err(String) -> Unit
+
+pub fn exit_with(Int32) -> Unit
+
+pub fn find_organization(Array[@json.Json], String) -> @json.Json?
+
+pub fn format_fixed(Double, Int32) -> String
+
+pub fn format_structured(@json.Json, String) -> String
+
+pub fn home_directory() -> String
+
+pub async fn info(String) -> Unit
+
+pub fn int_json(Int32) -> @json.Json
+
+pub fn iso_from_seconds(Int64) -> String
+
+pub fn json_array(@json.Json, String) -> Array[@json.Json]
+
+pub fn json_bool(@json.Json, String) -> Bool?
+
+pub fn json_get(@json.Json, String) -> @json.Json?
+
+pub fn json_int(@json.Json, String) -> Int32?
+
+pub fn json_nullable_string(@json.Json, String) -> String?
+
+pub fn json_number(@json.Json, String) -> Double?
+
+pub fn json_obj(Array[(String, @json.Json)]) -> @json.Json
+
+pub fn json_object(@json.Json, String) -> @json.Json?
+
+pub fn json_string(@json.Json, String) -> String?
+
+pub fn json_string_or_empty(@json.Json, String) -> String
+
+pub fn last_event_label(@json.Json, Int64) -> String
+
+pub fn lflag(String, String) -> FlagSpec
+
+pub async fn load_config() -> Result[Config, String]
+
+pub async fn login_with_api_key(String) -> Result[Unit, String]
+
+pub async fn login_with_browser() -> Result[Unit, String]
+
+pub async fn logout() -> Result[Unit, String]
+
+pub fn looks_like_uuid(String) -> Bool
+
+pub fn make_profile(String, String, String, String?, Token?, String?) -> Profile
+
+pub fn map_json(Map[String, String]) -> @json.Json
+
+pub fn now_compact_timestamp() -> String
+
+pub fn now_iso() -> String
+
+pub fn object_of(Array[(String, @json.Json)]) -> @json.Json
+
+pub async fn open_browser(String) -> Result[Unit, String]
+
+pub fn organization_info_fields(@json.Json) -> Array[(String, String)]
+
+pub async fn out(String) -> Unit
+
+pub fn pad_left(String, Int32) -> String
+
+pub fn pad_right(String, Int32) -> String
+
+pub fn parse_args(Array[String], Array[FlagSpec]) -> Result[ParsedArgs, String]
+
+pub fn parse_decimal(String) -> Int32?
+
+pub fn parse_int_flag(String, String) -> Result[Int32, String]
+
+pub fn parse_iso_millis(String) -> Int64?
+
+pub fn parse_pair(String, String) -> Result[(String, String), String]
+
+pub fn parse_pairs(Array[String]) -> Map[String, String]
+
+pub fn personal_organization_id(Array[@json.Json]) -> String
+
+pub fn platform() -> Int32
+
+pub async fn print_active_organization(Config) -> Unit
+
+pub async fn print_build_logs(String) -> Unit
+
+pub async fn print_group_help(String, String, Array[(String, String)]) -> Unit
+
+pub async fn print_root_help() -> Unit
+
+pub async fn print_snapshot_build_logs(String) -> Unit
+
+pub fn profile_from_json(@json.Json) -> Profile?
+
+pub fn profile_to_json(Profile) -> @json.Json
+
+pub fn profile_token(Profile) -> String?
+
+pub fn query_string(Array[(String, String)]) -> String
+
+pub fn random_bytes(Int32) -> Bytes
+
+pub async fn refresh_access_token(Profile) -> Result[Token, String]
+
+pub fn render_info(String, Array[(String, String)]) -> String
+
+pub fn render_table(Array[String], Array[Array[String]]) -> String
+
+pub fn require_max_positionals(ParsedArgs, Int32, String) -> Result[Unit, String]
+
+pub fn require_min_positionals(ParsedArgs, Int32, String) -> Result[Unit, String]
+
+pub fn require_positionals(ParsedArgs, Int32, String) -> Result[Unit, String]
+
+pub async fn resolve_organization_id(Config, String?) -> Result[String, String]
+
+pub fn resolve_region(Array[@json.Json], String) -> Result[@json.Json, String]
+
+pub async fn resolve_volume(String) -> Result[@json.Json, String]
+
+pub async fn run_cli(Array[String]) -> Result[Unit, String]
+
+pub async fn run_mcp(Array[String]) -> Result[Unit, String]
+
+pub fn sandbox_info_fields(@json.Json, Int64) -> Array[(String, String)]
+
+pub fn sandbox_name(@json.Json) -> String
+
+pub fn sandbox_path(String) -> String
+
+pub fn sandbox_state(@json.Json) -> String
+
+pub fn sandbox_state_label(String) -> String
+
+pub fn sandbox_state_priority(String) -> Int32
+
+pub async fn save_config(Config) -> Result[Unit, String]
+
+pub async fn save_refreshed_token(Profile, Token) -> Result[Unit, String]
+
+pub async fn set_active_organization(String) -> Result[Unit, String]
+
+pub async fn setup_autocompletion(String) -> Result[String, String]
+
+pub fn shell_quote(String) -> String
+
+pub fn snapshot_info_fields(@json.Json, Int64) -> Array[(String, String)]
+
+pub fn snapshot_path(String) -> String
+
+pub fn snapshot_size_label(@json.Json) -> String
+
+pub fn snapshot_state(@json.Json) -> String
+
+pub fn snapshot_state_label(String) -> String
+
+pub fn snapshot_state_priority(String) -> Int32
+
+pub fn split_exact(String, String) -> Array[String]
+
+pub fn split_fields(String) -> Array[String]
+
+pub fn split_once(String, String) -> (String, String)?
+
+pub fn stdin_is_terminal() -> Bool
+
+pub async fn success(String) -> Unit
+
+pub fn terminal_width() -> Int32
+
+pub fn time_since_label(String, Int64) -> String
+
+pub fn token_from_json(@json.Json) -> Token
+
+pub fn token_needs_refresh(Profile) -> Bool
+
+pub fn token_to_json(Token) -> @json.Json
+
+pub async fn toolbox_execute(String, String, String, String?, Int32?) -> Result[@json.Json, String]
+
+pub async fn toolbox_request(@http.RequestMethod, String, String, String, String, @json.Json?) -> Result[@json.Json, String]
+
+pub fn trim_trailing_slash(String) -> String
+
+pub fn truncate(String, Int32) -> String
+
+pub fn update_profile(Config, Profile) -> Result[Unit, String]
+
+pub fn url_decode(String) -> String
+
+pub fn url_encode(String) -> String
+
+pub fn validate_image_name(String) -> Result[Unit, String]
+
+pub fn version() -> String
+
+pub fn vflag(String, String) -> FlagSpec
+
+pub fn volume_info_fields(@json.Json, Int64) -> Array[(String, String)]
+
+pub fn volume_state(@json.Json) -> String
+
+pub fn volume_state_label(String) -> String
+
+pub fn with_field(@json.Json, String, @json.Json) -> @json.Json
+
+pub fn yaml_json(@json.Json, Int32) -> String
+
+// Errors
+
+// Types and methods
+pub(all) struct ApiResponse {
+  status : Int32
+  body : @json.Json
+  text : String
+}
+
+pub(all) struct Config {
+  mut active_profile_id : String
+  mut profiles : Array[Profile]
+}
+
+pub(all) struct FlagSpec {
+  long : String
+  short : String
+  takes_value : Bool
+  repeatable : Bool
+}
+
+pub(all) struct ParsedArgs {
+  positionals : Array[String]
+  values : Map[String, String]
+  flags : Map[String, Bool]
+  lists : Map[String, Array[String]]
+  changed : Map[String, Bool]
+  rest : Array[String]
+  mut help : Bool
+}
+
+pub(all) struct Profile {
+  id : String
+  name : String
+  url : String
+  key : String?
+  token : Token?
+  active_org : String?
+}
+
+pub(all) struct Token {
+  access_token : String
+  refresh_token : String
+  expires_at : String
+  issuer : String?
+  client_id : String?
+}
+
+// Type aliases
+
+// Traits

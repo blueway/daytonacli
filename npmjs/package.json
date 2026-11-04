@@ -1,0 +1,41 @@
+{
+  "name": "@kupas/daytona",
+  "version": "0.1.0",
+  "description": "Daytona CLI: manage Daytona sandboxes, snapshots, volumes and organizations.",
+  "license": "Apache-2.0",
+  "bin": {
+    "daytona": "bin/daytona.js"
+  },
+  "files": [
+    "bin/daytona.js",
+    "lib.js",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin",
+    "linux"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "scripts": {
+    "test": "node --test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kupas/daytona.git"
+  },
+  "homepage": "https://github.com/kupas/daytona",
+  "bugs": "https://github.com/kupas/daytona/issues",
+  "keywords": [
+    "daytona",
+    "sandbox",
+    "cli",
+    "moonbit"
+  ],
+  "preferGlobal": true
+}
