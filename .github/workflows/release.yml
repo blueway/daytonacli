@@ -23,6 +23,10 @@ jobs:
   build:
     name: build ${{ matrix.target }}
     runs-on: ${{ matrix.runner }}
+    # linux-x86_64 publishes its asset directly; the other targets still use
+    # the artifact store below.
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -36,7 +40,7 @@ jobs:
           # client loads with dlopen) is built against musl and linked in by
           # scripts/build-linux-static.sh; the build fails rather than ship a
           # binary that cannot talk to the API.
-          - runner: ubuntu-latest
+          - runner: ubuntu-24.04
             target: linux-x86_64
             musl: true
           # GitHub's arm64 Linux runners are only available to public
@@ -113,7 +117,52 @@ jobs:
           "./dist/daytona-${{ matrix.target }}" version
           "./dist/daytona-${{ matrix.target }}" help >/dev/null
 
+      # A v3 build traps in musl's __copy_tls with SIGILL before main on
+      # pre-Haswell CPUs. Require a clean start under a Sandy Bridge model.
+      - name: Smoke test (Sandy Bridge CPU model)
+        if: matrix.target == 'linux-x86_64'
+        run: |
+          set -eu
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq qemu-user
+          qemu-x86_64 -cpu SandyBridge "./dist/daytona-${{ matrix.target }}" version
+          qemu-x86_64 -cpu SandyBridge "./dist/daytona-${{ matrix.target }}" help >/dev/null
+
+      - name: Resolve release tag
+        id: tag
+        if: matrix.target == 'linux-x86_64'
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_TYPE: ${{ github.ref_type }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          set -eu
+          if [ -n "${INPUT_TAG:-}" ]; then
+            TAG="$INPUT_TAG"
+          elif [ "$REF_TYPE" = "tag" ]; then
+            TAG="$REF_NAME"
+          else
+            TAG="v$(sed -n 's/^version[[:space:]]*=[[:space:]]*"\(.*\)"/\1/p' moon.mod)"
+          fi
+          case "$TAG" in v*) ;; *) TAG="v$TAG" ;; esac
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
+      # No upload-artifact hop for linux-x86_64: publish the asset straight to
+      # the release. This also means a failure in another target cannot block
+      # the x86_64 asset.
+      - name: Publish linux-x86_64 to the release
+        if: matrix.target == 'linux-x86_64'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            dist/daytona-${{ matrix.target }}
+            dist/daytona-${{ matrix.target }}.sha256
+
       - uses: actions/upload-artifact@v4
+        if: matrix.target != 'linux-x86_64'
         with:
           name: daytona-${{ matrix.target }}
           path: |
