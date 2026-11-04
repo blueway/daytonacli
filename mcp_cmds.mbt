@@ -973,7 +973,7 @@ async fn mcp_start(args : Array[String]) -> Result[Unit, String] {
                   "serverInfo",
                   json_obj([
                     ("name", Json::string("daytona")),
-                    ("version", Json::string("0.1.0")),
+                    ("version", Json::string("0.1.3")),
                   ]),
                 ),
               ]),

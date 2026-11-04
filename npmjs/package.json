@@ -1,6 +1,6 @@
 {
   "name": "@kupas/daytona",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Daytona CLI: manage Daytona sandboxes, snapshots, volumes and organizations.",
   "license": "Apache-2.0",
   "bin": {
