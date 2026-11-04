@@ -1,8 +1,10 @@
 name: verify-ubuntu-2404-baseline
 
-# Temporary verification workflow. Builds the same commit that produced the
-# failing static release asset, but on ubuntu-24.04, then checks the ISA and
-# runs the result under QEMU's Sandy Bridge CPU model.
+# Temporary verification workflow (deleted after the run).
+# Job A: build the failing release commit on ubuntu-24.04, inspect the ISA and
+#        run the result under QEMU's Sandy Bridge CPU model.
+# Job B: same build on ubuntu-latest (26.04, GCC 15 / -march=x86-64-v3) as a
+#        control: it must SIGILL under the same QEMU CPU model.
 
 on:
   push:
@@ -12,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  verify:
+  verify-2404:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     steps:
@@ -22,8 +24,7 @@ jobs:
         run: |
           set -x
           gcc --version | head -1
-          ldd --version | head -1
-          cat /etc/os-release | head -3
+          . /etc/os-release && echo "$PRETTY_NAME"
 
       - name: Install MoonBit
         run: |
@@ -35,14 +36,15 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y -qq musl-tools perl make curl qemu-user
 
-      - name: Inspect musl libc.a ISA baseline
+      - name: Inspect musl libc.a
         run: |
           set -eux
-          libc="$(musl-gcc -print-file-name=libc.a)"
-          echo "libc.a = $libc"
+          libc=/usr/lib/x86_64-linux-musl/libc.a
+          ls -l "$libc"
           echo "musl version: $(strings "$libc" | grep -m1 '^1\.2\.')"
-          echo "x86-64-v3 insn count in libc.a:"
-          objdump -d "$libc" | grep -cE '\b(andn|bzhi|shlx|shrx|sarx|vpermd|vpbroadcastd|vpternlogd|vperm2i128)\b' || true
+          echo "v3 insn count in libc.a: $(objdump -d "$libc" | grep -cE '\b(andn|bzhi|shlx|shrx|sarx|vpermd|vpbroadcastd|vpternlogd|vperm2i128)\b' || true)"
+          echo "--- libc __copy_tls ---"
+          objdump -d "$libc" | awk '/<__copy_tls>:/{f=1} f{print} f&&/^$/{exit}'
 
       - name: Show toolchain
         run: moon version --all
@@ -57,13 +59,14 @@ jobs:
         run: |
           set -eux
           file dist/daytona-linux-x86_64
-          echo "x86-64-v3 insn count in binary:"
-          objdump -d dist/daytona-linux-x86_64 | grep -cE '\b(andn|bzhi|shlx|shrx|sarx|vpermd|vpbroadcastd|vpternlogd|vperm2i128)\b' || true
+          echo "total v3 insn: $(objdump -d dist/daytona-linux-x86_64 | grep -cE '\b(andn|bzhi|shlx|shrx|sarx|vpermd|vpbroadcastd|vpternlogd|vperm2i128)\b' || true)"
+          echo "--- v3 insn by symbol ---"
+          objdump -d dist/daytona-linux-x86_64 | awk '
+            /^[0-9a-f]+ <.*>:/ { sym=$2; next }
+            /\t(andn|bzhi|shlx|shrx|sarx|vpermd|vpbroadcastd|vpternlogd|vperm2i128)[ \t]/ { print sym }
+          ' | sort | uniq -c | sort -rn | head -25
           echo "--- __copy_tls ---"
-          objdump -d --disassemble=__copy_tls dist/daytona-linux-x86_64 | head -30
-
-      - name: QEMU CPU models
-        run: qemu-x86_64 -cpu help | grep -iE 'sandy|haswell|qemu64' || true
+          objdump -d --disassemble=__copy_tls dist/daytona-linux-x86_64
 
       - name: Run under Sandy Bridge CPU model
         run: |
@@ -71,3 +74,44 @@ jobs:
           qemu-x86_64 -cpu SandyBridge ./dist/daytona-linux-x86_64 version
           qemu-x86_64 -cpu SandyBridge ./dist/daytona-linux-x86_64 help >/dev/null
           echo "SANDYBRIDGE-RUN-OK"
+
+  control-latest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Host toolchain
+        run: |
+          set -x
+          gcc --version | head -1
+          . /etc/os-release && echo "$PRETTY_NAME"
+
+      - name: Install MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq musl-tools perl make curl qemu-user
+
+      - name: Update dependencies
+        run: moon update
+
+      - name: Build static release
+        run: ./scripts/build-linux-static.sh dist/daytona-linux-x86_64
+
+      - name: Native run on the runner CPU
+        run: ./dist/daytona-linux-x86_64 version
+
+      - name: Run under Sandy Bridge CPU model (expected to fail)
+        run: |
+          set +e
+          qemu-x86_64 -cpu SandyBridge ./dist/daytona-linux-x86_64 version
+          rc=$?
+          echo "sandybridge exit code: $rc"
+          set -e
+          test "$rc" -ne 0
+          echo "CONTROL-REPRODUCED"
