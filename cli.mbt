@@ -4,7 +4,7 @@
 ///|
 /// The CLI version reported by `daytona version`.
 pub fn cli_version() -> String {
-  "v0.1.0"
+  "v0.1.2"
 }
 
 ///|

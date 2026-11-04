@@ -58,6 +58,13 @@ for dir in /usr/include/*-linux-gnu; do
 done
 [ -n "$multiarch" ] || die "no /usr/include/*-linux-gnu directory found"
 
+# OpenSSL's Configure takes a target name, not just a compiler: configuring
+# linux-x86_64 on an aarch64 runner leaves the x86 asm to the arm assembler.
+case "$(uname -m)" in
+  aarch64 | arm64) openssl_target=linux-aarch64 ;;
+  *) openssl_target=linux-x86_64 ;;
+esac
+
 mkdir -p "$work"
 
 # --- OpenSSL for musl ------------------------------------------------------
@@ -86,7 +93,7 @@ if [ ! -f "$cache/libssl.a" ] || [ ! -f "$cache/libcrypto.a" ]; then
     # is not needed. no-tests keeps the build short. openssldir matches the
     # Debian/Ubuntu certificate layout, which is what the client verifies with.
     CC="musl-gcc -idirafter /usr/include -idirafter $multiarch" \
-      ./Configure linux-x86_64 no-shared no-tests no-comp no-async \
+      ./Configure "$openssl_target" no-shared no-tests no-comp no-async \
       --prefix="$cache/install" --openssldir=/etc/ssl >"$cache/configure.log" 2>&1 ||
       die "OpenSSL configure failed; see $cache/configure.log"
     make -j"$(nproc)" >"$cache/build.log" 2>&1 ||
